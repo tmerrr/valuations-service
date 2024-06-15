@@ -12,7 +12,7 @@ describe('ValuationController (e2e)', () => {
     vi.resetAllMocks();
   });
 
-  describe('PUT /valuations/', () => {
+  describe('PUT /valuations/:vrm', () => {
     it('should return 404 if VRM is missing', async () => {
       const requestBody: VehicleValuationRequest = {
         mileage: 10000,
@@ -114,6 +114,64 @@ describe('ValuationController (e2e)', () => {
         highestValue,
         lowestValue,
       });
+    });
+  });
+
+  describe('GET /valuations/:vrm', () => {
+    it.each([
+      '',
+      '12345678',
+    ])('should return 400 status and error message when invalid vim supplied', async (vrm) => {
+      const res = await fastify.inject({
+        url: `/valuations/${vrm}`,
+        method: 'GET',
+      });
+
+      expect(res.statusCode).toStrictEqual(400);
+      expect(JSON.parse(res.body)).toEqual({
+        message: 'vrm must be 7 characters or less',
+        statusCode: 400,
+      });
+    });
+
+    it('should return 404 status and error message when valuation not found for VRM', async () => {
+      const vrm = 'ABC123';
+
+      vi.spyOn(fastify.orm, 'getRepository').mockReturnValueOnce({
+        findOneBy: vi.fn().mockResolvedValueOnce(null),
+      } as any);
+
+      const res = await fastify.inject({
+        url: `/valuations/${vrm}`,
+        method: 'GET',
+      });
+
+      expect(res.statusCode).toStrictEqual(404);
+      expect(JSON.parse(res.body)).toEqual({
+        message: `Valuation for VRM ${vrm} not found`,
+        statusCode: 404,
+      });
+    });
+
+    it('should return 200 status and valuation when found for VRM', async () => {
+      const vrm = 'ABC123';
+      const valuation = {
+        vrm,
+        highestValue: 20_000,
+        lowestValue: 15_000,
+      };
+
+      vi.spyOn(fastify.orm, 'getRepository').mockReturnValueOnce({
+        findOneBy: vi.fn().mockResolvedValueOnce(valuation),
+      } as any);
+
+      const res = await fastify.inject({
+        url: `/valuations/${vrm}`,
+        method: 'GET',
+      });
+
+      expect(res.statusCode).toStrictEqual(200);
+      expect(JSON.parse(res.body)).toEqual(valuation);
     });
   });
 });
