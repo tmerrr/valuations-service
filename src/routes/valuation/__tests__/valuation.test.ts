@@ -1,5 +1,5 @@
 import { fastify } from '~root/test/fastify';
-import { SuperCarValuationResponse } from '@app/super-car/types/super-car-valuation-response';
+import { SuperCarValuationResponse } from '@app/adapters/super-car/types/super-car-valuation-response';
 import axios from 'axios';
 import { VehicleValuationRequest } from '../types/vehicle-valuation-request';
 

@@ -119,4 +119,7 @@ The URI for this test stub in Mocky is https://run.mocky.io/v3/0dfda26a-3a5a-43e
 
 
 # Candidate Notes
+* Have made an assumption that `mileage` would be required as a query string param when calling the Premium Car API, as it's missing from the swagger. Would normally get this confirmed before implementing
+* 
+
 Here is a place for you to put any notes regarding the changes you made and the reasoning and what further changes you wish to suggest.
