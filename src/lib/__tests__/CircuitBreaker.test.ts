@@ -1,4 +1,4 @@
-import CircuitBreaker from '../lib/CircuitBreaker';
+import CircuitBreaker from '../CircuitBreaker';
 
 describe('CircuitBreaker', () => {
   beforeEach(() => {

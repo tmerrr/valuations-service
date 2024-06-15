@@ -30,12 +30,12 @@ const responseWrapper = async (promise: Promise<VehicleValuation>): Promise<Valu
   try {
     const data = await promise;
     return successResponse(data);
-  } catch {
+  } catch (err) {
     return errorResponse(new Error('Unable to fetch valuation'));
   }
 };
 
-export const fetchCarValuationWithBreaker = (circuitBreaker: CircuitBreaker) => async (vrm: string, value: number) => {
+export const fetchCarValuationWithBreaker = (circuitBreaker: CircuitBreaker) => (vrm: string, value: number) => {
   return responseWrapper(circuitBreaker.run(
     () => fetchValuationFromSuperCarValuation(vrm, value), // primary call
     () => fetchValuationFromPremiumCarValuation(vrm, value), // fallback call
