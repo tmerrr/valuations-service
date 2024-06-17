@@ -1,5 +1,6 @@
 import { fastify, circuitBreaker } from '~root/test/fastify';
 import { SuperCarValuationResponse } from '@app/adapters/super-car/types/super-car-valuation-response';
+import { VehicleValuationDto } from '@app/models/vehicle-valuation';
 import axios from 'axios';
 import { VehicleValuationRequest } from '../types/vehicle-valuation-request';
 
@@ -134,6 +135,7 @@ describe('ValuationController (e2e)', () => {
         vrm,
         highestValue,
         lowestValue,
+        providerName: 'SuperCarValuation',
       });
     });
 
@@ -199,7 +201,7 @@ describe('ValuationController (e2e)', () => {
 
     it('should return 200 status and valuation when found for VRM', async () => {
       const vrm = 'ABC123';
-      const valuation = {
+      const valuation: VehicleValuationDto = {
         vrm,
         highestValue: 20_000,
         lowestValue: 15_000,

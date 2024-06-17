@@ -13,11 +13,10 @@ export async function fetchValuationFromSuperCarValuation(
     `valuations/${vrm}?mileage=${mileage}`,
   );
 
-  const valuation = new VehicleValuation();
-
-  valuation.vrm = vrm;
-  valuation.lowestValue = response.data.valuation.lowerValue;
-  valuation.highestValue = response.data.valuation.upperValue;
-
-  return valuation;
+  return VehicleValuation.from({
+    vrm,
+    lowestValue: response.data.valuation.lowerValue,
+    highestValue: response.data.valuation.upperValue,
+    providerName: 'SuperCarValuation',
+  });
 }

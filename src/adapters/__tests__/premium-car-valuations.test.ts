@@ -30,6 +30,7 @@ describe('fetchValuationFromPremiumCarValuation', () => {
       vrm,
       lowestValue: 9_500,
       highestValue: 10_275,
+      providerName: 'PremiumCarValuation',
     });
   });
 });

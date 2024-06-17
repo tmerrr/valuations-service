@@ -18,13 +18,12 @@ export async function fetchValuationFromPremiumCarValuation(
 
   const premiumCarValuation = await parsePremiumCarValuationResponse(response.data);
 
-  const valuation = new VehicleValuation();
-
-  valuation.vrm = vrm;
-  valuation.lowestValue = premiumCarValuation.dealershipValuation.lowerValue;
-  valuation.highestValue = premiumCarValuation.dealershipValuation.upperValue;
-
-  return valuation;
+  return VehicleValuation.from({
+    vrm,
+    lowestValue: premiumCarValuation.dealershipValuation.lowerValue,
+    highestValue: premiumCarValuation.dealershipValuation.upperValue,
+    providerName: 'PremiumCarValuation',
+  });
 }
 
 const parsePremiumCarValuationResponse = async (xmlData: string): Promise<PremiumCarValuationResponse> => {

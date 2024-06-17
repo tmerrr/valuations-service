@@ -22,7 +22,7 @@ export function valuationRoutes(fastify: FastifyInstance) {
         .send({ message: 'vrm must be 7 characters or less', statusCode: 400 });
     }
 
-    const result = await valuationRepository.findOneBy({ vrm: vrm });
+    const result = await valuationRepository.findOneBy({ vrm });
 
     if (result === null) {
       fastify.log.warn('Valuation not found for VRM: ', vrm);
