@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn, Repository } from 'typeorm';
 
 export type VehicleValuationDto = {
   vrm: string;
@@ -34,3 +34,6 @@ export class VehicleValuation {
     return (this.highestValue + this.lowestValue) / 2;
   }
 }
+
+export const getVehicleValuationByVrm = async (vrm: string, repository: Repository<VehicleValuation>) =>
+  repository.findOneBy({ vrm });
