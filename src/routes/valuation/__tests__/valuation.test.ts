@@ -6,7 +6,7 @@ import { VehicleValuationRequest } from '../types/vehicle-valuation-request';
 
 vi.mock("axios");
 
-const mockAxiosGet = vi.mocked(axios.get);
+const mockAxios = vi.mocked(axios);
 
 describe('ValuationController (e2e)', () => {
   beforeEach(() => {
@@ -20,7 +20,7 @@ describe('ValuationController (e2e)', () => {
         findOneBy: vi.fn().mockResolvedValueOnce(null),
       } as any);
 
-      mockAxiosGet.mockRejectedValue(new Error('test'));
+      mockAxios.mockRejectedValue(new Error('test'));
       
       const requestBody: VehicleValuationRequest = {
         mileage: 10000,
@@ -109,7 +109,7 @@ describe('ValuationController (e2e)', () => {
         },
       };
 
-      mockAxiosGet.mockResolvedValue({
+      mockAxios.mockResolvedValue({
         status: 200,
         data: mockApiResponse,
       })
