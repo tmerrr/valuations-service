@@ -60,6 +60,11 @@ export function valuationRoutes(fastify: FastifyInstance) {
         });
     }
 
+    const existingValuation = await valuationRepository.findOneBy({ vrm });
+    if (existingValuation) {
+      return existingValuation;
+    }
+
     const { data: valuation, err } = await fetchCarValuation(vrm, mileage);
     if (err) {
       return reply

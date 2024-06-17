@@ -15,12 +15,15 @@ describe('ValuationController (e2e)', () => {
 
   describe('PUT /valuations/:vrm', () => {
     it('should return a 503 when both valuation providers are down', async () => {
+      vi.spyOn(fastify.orm, 'getRepository').mockReturnValueOnce({
+        findOneBy: vi.fn().mockResolvedValueOnce(null),
+      } as any);
+
+      mockAxiosGet.mockRejectedValue(new Error('test'));
+      
       const requestBody: VehicleValuationRequest = {
         mileage: 10000,
       };
-
-      mockAxiosGet.mockRejectedValue(new Error('test'));
-
       const res = await fastify.inject({
         url: '/valuations/ABC123',
         body: requestBody,
@@ -112,6 +115,7 @@ describe('ValuationController (e2e)', () => {
 
       // prefer to avoid any type where possible, but allows us to simply mock the only fn used
       vi.spyOn(fastify.orm, 'getRepository').mockReturnValueOnce({
+        findOneBy: vi.fn().mockResolvedValueOnce(null),
         insert: vi.fn().mockResolvedValueOnce({}),
       } as any);
 
