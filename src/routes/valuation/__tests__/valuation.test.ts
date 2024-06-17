@@ -1,5 +1,5 @@
-import { fastify } from '~root/test/fastify';
-import { SuperCarValuationResponse } from '@app/super-car/types/super-car-valuation-response';
+import { fastify, circuitBreaker } from '~root/test/fastify';
+import { SuperCarValuationResponse } from '@app/adapters/super-car/types/super-car-valuation-response';
 import axios from 'axios';
 import { VehicleValuationRequest } from '../types/vehicle-valuation-request';
 
@@ -9,10 +9,27 @@ const mockAxiosGet = vi.mocked(axios.get);
 
 describe('ValuationController (e2e)', () => {
   beforeEach(() => {
+    (circuitBreaker as any).reset();
     vi.resetAllMocks();
   });
 
   describe('PUT /valuations/:vrm', () => {
+    it('should return a 503 when both valuation providers are down', async () => {
+      const requestBody: VehicleValuationRequest = {
+        mileage: 10000,
+      };
+
+      mockAxiosGet.mockRejectedValue(new Error('test'));
+
+      const res = await fastify.inject({
+        url: '/valuations/ABC123',
+        body: requestBody,
+        method: 'PUT',
+      });
+
+      expect(res.statusCode).toStrictEqual(503);
+    });
+
     it('should return 404 if VRM is missing', async () => {
       const requestBody: VehicleValuationRequest = {
         mileage: 10000,

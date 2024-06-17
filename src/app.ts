@@ -6,8 +6,14 @@ import { valuationRoutes } from './routes/valuation';
 
 import databaseConnection from 'typeorm-fastify-plugin';
 import { VehicleValuation } from './models/vehicle-valuation';
+import CircuitBreaker from './lib/CircuitBreaker';
+import { circuitBreakerConfig } from './config';
 
-export const app = (opts?: FastifyServerOptions) => {
+interface Dependencies {
+  circuitBreaker: CircuitBreaker;
+}
+
+export const app = (opts?: FastifyServerOptions, deps?: Dependencies) => {
   const fastify = Fastify(opts);
   fastify
     .register(databaseConnection, {
@@ -20,6 +26,9 @@ export const app = (opts?: FastifyServerOptions) => {
       subscribers: [],
     })
     .ready();
+
+  const circuitBreaker = deps?.circuitBreaker ?? new CircuitBreaker(circuitBreakerConfig);
+  fastify.decorate('circuitBreaker', circuitBreaker);
 
   fastify.get('/', async () => {
     return { hello: 'world' };

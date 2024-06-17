@@ -1,9 +1,12 @@
 import { FastifyInstance } from 'fastify';
 import { VehicleValuationRequest } from './types/vehicle-valuation-request';
-import { fetchValuationFromSuperCarValuation } from '@app/super-car/super-car-valuation';
 import { VehicleValuation } from '@app/models/vehicle-valuation';
+import { fetchCarValuationWithBreaker } from '@app/adapters/fetchCarValuation';
 
 export function valuationRoutes(fastify: FastifyInstance) {
+  const { circuitBreaker } = fastify as any;
+  const fetchCarValuation = fetchCarValuationWithBreaker(circuitBreaker);
+
   fastify.get<{
     Params: {
       vrm: string;
@@ -57,7 +60,12 @@ export function valuationRoutes(fastify: FastifyInstance) {
         });
     }
 
-    const valuation = await fetchValuationFromSuperCarValuation(vrm, mileage);
+    const { data: valuation, err } = await fetchCarValuation(vrm, mileage);
+    if (err) {
+      return reply
+        .code(503)
+        .send({ message: err.message, statusCode: 503 });
+    }
 
     // Save to DB.
     await valuationRepository.insert(valuation).catch((err) => {

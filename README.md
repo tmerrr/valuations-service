@@ -119,4 +119,7 @@ The URI for this test stub in Mocky is https://run.mocky.io/v3/0dfda26a-3a5a-43e
 
 
 # Candidate Notes
-Here is a place for you to put any notes regarding the changes you made and the reasoning and what further changes you wish to suggest.
+* Have made an assumption that `mileage` would be required as a query string param when calling the Premium Car API, as it's missing from the swagger. Would normally get this confirmed before implementing
+* The tests for `fetchCarValuation` duplicate some of tests from the Circuit Breaker class. Could have opted to provide a mock instance of the breaker or spy on the run function to determine outcome, but wanted to ensure it was behaving as expected
+* Currently no logging throughout the application, would look to add more logs on a production app.
+* `responseWrapper` in the fetch car valuation adapter currently swallows the original error(s). May be preferable to have the Circuit Breaker accept a logger in the config and log original errors returned from TPP's
