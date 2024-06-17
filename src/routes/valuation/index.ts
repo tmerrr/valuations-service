@@ -23,7 +23,7 @@ export function valuationRoutes(fastify: FastifyInstance) {
 
     const result = await valuationRepository.findOneBy({ vrm: vrm });
 
-    if (result == null) {
+    if (result === null) {
       return reply
         .code(404)
         .send({

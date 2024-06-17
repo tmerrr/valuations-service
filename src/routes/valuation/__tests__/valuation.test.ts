@@ -132,6 +132,29 @@ describe('ValuationController (e2e)', () => {
         lowestValue,
       });
     });
+
+    it('should return an existing valuation if one exists', async () => {
+      const existingValuation = {
+        vrm: 'ABC123',
+        highestValue: 20_000,
+        lowestValue: 15_000,
+      };
+      vi.spyOn(fastify.orm, 'getRepository').mockReturnValueOnce({
+        findOneBy: vi.fn().mockResolvedValueOnce(existingValuation),
+      } as any);
+
+      const requestBody: VehicleValuationRequest = {
+        mileage: 10_000,
+      };
+      const res = await fastify.inject({
+        url: `/valuations/${existingValuation.vrm}`,
+        method: 'PUT',
+        body: requestBody,
+      });
+
+      expect(res.statusCode).toStrictEqual(200);
+      expect(JSON.parse(res.body)).toEqual(existingValuation);
+    });
   });
 
   describe('GET /valuations/:vrm', () => {
