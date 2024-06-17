@@ -1,7 +1,9 @@
 import { FastifyInstance } from 'fastify';
 import { VehicleValuationRequest } from './types/vehicle-valuation-request';
-import { VehicleValuation } from '@app/models/vehicle-valuation';
+import { VehicleValuation, getVehicleValuationByVrm } from '@app/models/vehicle-valuation';
 import { fetchCarValuationWithBreaker } from '@app/adapters/fetchCarValuation';
+
+const isValidVrm = (vrm?: string | null): vrm is string => !!vrm && vrm.length <= 7;
 
 export function valuationRoutes(fastify: FastifyInstance) {
   const { circuitBreaker } = fastify as any;
@@ -13,17 +15,21 @@ export function valuationRoutes(fastify: FastifyInstance) {
     };
   }>('/valuations/:vrm', async (request, reply) => {
     const valuationRepository = fastify.orm.getRepository(VehicleValuation);
-    const { vrm } = request.params;
+    const {
+      params: { vrm },
+    } = request;
 
-    if (vrm === null || vrm === '' || vrm.length > 7) {
+    if (!isValidVrm(vrm)) {
+      fastify.log.warn('Invalid VRM: ', vrm);
       return reply
         .code(400)
         .send({ message: 'vrm must be 7 characters or less', statusCode: 400 });
     }
 
-    const result = await valuationRepository.findOneBy({ vrm: vrm });
+    const result = await getVehicleValuationByVrm(vrm, valuationRepository);
 
-    if (result == null) {
+    if (result === null) {
+      fastify.log.warn('Valuation not found for VRM: ', vrm);
       return reply
         .code(404)
         .send({
@@ -41,17 +47,21 @@ export function valuationRoutes(fastify: FastifyInstance) {
       vrm: string;
     };
   }>('/valuations/:vrm', async (request, reply) => {
-    const valuationRepository = fastify.orm.getRepository(VehicleValuation);
-    const { vrm } = request.params;
-    const { mileage } = request.body;
+  const valuationRepository = fastify.orm.getRepository(VehicleValuation);
+  const {
+      params: { vrm },
+      body: { mileage },
+    } = request;
 
-    if (vrm.length > 7) {
+    if (!isValidVrm(vrm)) {
+      fastify.log.warn('Invalid VRM: ', vrm);
       return reply
         .code(400)
         .send({ message: 'vrm must be 7 characters or less', statusCode: 400 });
     }
 
     if (mileage === null || mileage <= 0) {
+      fastify.log.warn('Invalid mileage: ', mileage);
       return reply
         .code(400)
         .send({
@@ -60,8 +70,15 @@ export function valuationRoutes(fastify: FastifyInstance) {
         });
     }
 
+    const existingValuation = await getVehicleValuationByVrm(vrm, valuationRepository);
+    if (existingValuation) {
+      fastify.log.info('Valuation already exists: ', existingValuation);
+      return existingValuation;
+    }
+
     const { data: valuation, err } = await fetchCarValuation(vrm, mileage);
     if (err) {
+      fastify.log.error('Failed to fetch valuation: ', err);
       return reply
         .code(503)
         .send({ message: err.message, statusCode: 503 });
@@ -70,6 +87,7 @@ export function valuationRoutes(fastify: FastifyInstance) {
     // Save to DB.
     await valuationRepository.insert(valuation).catch((err) => {
       if (err.code !== 'SQLITE_CONSTRAINT') {
+        fastify.log.error('Failed to save valuation: ', err);
         throw err;
       }
     });

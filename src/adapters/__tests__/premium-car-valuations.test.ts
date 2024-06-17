@@ -1,8 +1,9 @@
+import { premiumCarValuationUrl } from '@app/config';
 import { fetchValuationFromPremiumCarValuation } from '../premium-car/premium-car-valuation';
 import axios from 'axios';
 
 vi.mock("axios");
-const mockAxiosGet = vi.mocked(axios.get);
+const mockAxios = vi.mocked(axios);
 
 const mockResponse = `<?xml version="1.0" encoding="UTF-8" ?>
 <root>
@@ -21,7 +22,7 @@ describe('fetchValuationFromPremiumCarValuation', () => {
   });
 
   it("successfully fetches and parses the valuation", async () => {
-    mockAxiosGet.mockResolvedValue({ status: 200, data: mockResponse });
+    mockAxios.mockResolvedValue({ status: 200, data: mockResponse });
 
     const vrm = "ABC123";
     const valuation = await fetchValuationFromPremiumCarValuation(vrm, 10000);
@@ -30,6 +31,15 @@ describe('fetchValuationFromPremiumCarValuation', () => {
       vrm,
       lowestValue: 9_500,
       highestValue: 10_275,
+      providerName: 'PremiumCarValuation',
+    });
+    expect(mockAxios).toHaveBeenCalledWith({
+      url: premiumCarValuationUrl,
+      method: 'GET',
+      params: {
+        vrm,
+        mileage: 10000,
+      },
     });
   });
 });

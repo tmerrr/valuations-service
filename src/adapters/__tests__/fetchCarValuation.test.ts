@@ -16,6 +16,7 @@ const valuation: VehicleValuation = {
   lowestValue: 1_000,
   highestValue: 2_000,
   midpointValue: 1_500,
+  providerName: 'SuperCarValuation',
 };
 
 describe('fetchCarValuation', () => {

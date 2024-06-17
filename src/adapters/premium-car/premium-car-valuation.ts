@@ -1,30 +1,33 @@
 import axios from 'axios';
 import { parseStringPromise } from 'xml2js';
 
-import { VehicleValuation } from '../../models/vehicle-valuation';
+import { premiumCarValuationUrl } from '@app/config';
+import { VehicleValuation } from '@app/models/vehicle-valuation';
 import { PremiumCarValuationResponse } from './types/premium-car-valuation-response';
 
 export async function fetchValuationFromPremiumCarValuation(
   vrm: string,
   mileage: number,
 ): Promise<VehicleValuation> {
-  axios.defaults.baseURL =
-    'https://run.mocky.io/v3/0dfda26a-3a5a-43e5-b68c-51f148eda473';
   // data will be an xml string, needs parsing to an object
-  // mileage is missing from the swagger doc, but going to assume a mistake and would be required to obtain a valuation
-  const response = await axios.get<string>(
-    `valueCar?vrm=${vrm}&mileage=${mileage}`,
-  );
+  const response = await axios<string>({
+    url: premiumCarValuationUrl,
+    method: 'GET',
+    params: {
+      vrm,
+      // mileage is missing from the swagger doc, but going to assume a mistake and would be required to obtain a valuation
+      mileage,
+    },
+  });
 
   const premiumCarValuation = await parsePremiumCarValuationResponse(response.data);
 
-  const valuation = new VehicleValuation();
-
-  valuation.vrm = vrm;
-  valuation.lowestValue = premiumCarValuation.dealershipValuation.lowerValue;
-  valuation.highestValue = premiumCarValuation.dealershipValuation.upperValue;
-
-  return valuation;
+  return VehicleValuation.from({
+    vrm,
+    lowestValue: premiumCarValuation.dealershipValuation.lowerValue,
+    highestValue: premiumCarValuation.dealershipValuation.upperValue,
+    providerName: 'PremiumCarValuation',
+  });
 }
 
 const parsePremiumCarValuationResponse = async (xmlData: string): Promise<PremiumCarValuationResponse> => {

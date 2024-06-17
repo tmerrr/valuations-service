@@ -1,11 +1,12 @@
 import { fastify, circuitBreaker } from '~root/test/fastify';
 import { SuperCarValuationResponse } from '@app/adapters/super-car/types/super-car-valuation-response';
+import { VehicleValuationDto } from '@app/models/vehicle-valuation';
 import axios from 'axios';
 import { VehicleValuationRequest } from '../types/vehicle-valuation-request';
 
 vi.mock("axios");
 
-const mockAxiosGet = vi.mocked(axios.get);
+const mockAxios = vi.mocked(axios);
 
 describe('ValuationController (e2e)', () => {
   beforeEach(() => {
@@ -15,12 +16,15 @@ describe('ValuationController (e2e)', () => {
 
   describe('PUT /valuations/:vrm', () => {
     it('should return a 503 when both valuation providers are down', async () => {
+      vi.spyOn(fastify.orm, 'getRepository').mockReturnValueOnce({
+        findOneBy: vi.fn().mockResolvedValueOnce(null),
+      } as any);
+
+      mockAxios.mockRejectedValue(new Error('test'));
+      
       const requestBody: VehicleValuationRequest = {
         mileage: 10000,
       };
-
-      mockAxiosGet.mockRejectedValue(new Error('test'));
-
       const res = await fastify.inject({
         url: '/valuations/ABC123',
         body: requestBody,
@@ -105,13 +109,14 @@ describe('ValuationController (e2e)', () => {
         },
       };
 
-      mockAxiosGet.mockResolvedValue({
+      mockAxios.mockResolvedValue({
         status: 200,
         data: mockApiResponse,
       })
 
       // prefer to avoid any type where possible, but allows us to simply mock the only fn used
       vi.spyOn(fastify.orm, 'getRepository').mockReturnValueOnce({
+        findOneBy: vi.fn().mockResolvedValueOnce(null),
         insert: vi.fn().mockResolvedValueOnce({}),
       } as any);
 
@@ -130,7 +135,31 @@ describe('ValuationController (e2e)', () => {
         vrm,
         highestValue,
         lowestValue,
+        providerName: 'SuperCarValuation',
       });
+    });
+
+    it('should return an existing valuation if one exists', async () => {
+      const existingValuation = {
+        vrm: 'ABC123',
+        highestValue: 20_000,
+        lowestValue: 15_000,
+      };
+      vi.spyOn(fastify.orm, 'getRepository').mockReturnValueOnce({
+        findOneBy: vi.fn().mockResolvedValueOnce(existingValuation),
+      } as any);
+
+      const requestBody: VehicleValuationRequest = {
+        mileage: 10_000,
+      };
+      const res = await fastify.inject({
+        url: `/valuations/${existingValuation.vrm}`,
+        method: 'PUT',
+        body: requestBody,
+      });
+
+      expect(res.statusCode).toStrictEqual(200);
+      expect(JSON.parse(res.body)).toEqual(existingValuation);
     });
   });
 
@@ -172,7 +201,7 @@ describe('ValuationController (e2e)', () => {
 
     it('should return 200 status and valuation when found for VRM', async () => {
       const vrm = 'ABC123';
-      const valuation = {
+      const valuation: VehicleValuationDto = {
         vrm,
         highestValue: 20_000,
         lowestValue: 15_000,

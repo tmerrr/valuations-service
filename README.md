@@ -120,6 +120,9 @@ The URI for this test stub in Mocky is https://run.mocky.io/v3/0dfda26a-3a5a-43e
 
 # Candidate Notes
 * Have made an assumption that `mileage` would be required as a query string param when calling the Premium Car API, as it's missing from the swagger. Would normally get this confirmed before implementing
-* The tests for `fetchCarValuation` duplicate some of tests from the Circuit Breaker class. Could have opted to provide a mock instance of the breaker or spy on the run function to determine outcome, but wanted to ensure it was behaving as expected
-* Currently no logging throughout the application, would look to add more logs on a production app.
+* The tests for `fetchCarValuation` duplicate some of tests from the Circuit Breaker class. Could have opted to provide a mock instance of the breaker or spy on the `run` function to determine outcome, but wanted to ensure it was behaving as expected
+* Currently little logging throughout the application, would look to add more logs on a production app.
 * `responseWrapper` in the fetch car valuation adapter currently swallows the original error(s). May be preferable to have the Circuit Breaker accept a logger in the config and log original errors returned from TPP's
+* In the interest of time, I have used the `any` type in a few places, which I would normally avoid wherever possible
+* Looking back on the implementation of the `CircuitBreaker` class, I think it is doing too much and I may reduce the scope of its responsibilities. When building, I liked the idea of the Circuit Breaker also handling how to handle the fallback function. However I think this has increased the responsibility and complexity of the class, so may have done this elsewhere in a larger refactor.
+* To complete the final task, I would have created a new TypeORM model `ProviderLog` with the relevant columns and attributes.  The `fetchCarValuation` adapter could then handle also timing and persisting these records as requests are made to the TPPs
