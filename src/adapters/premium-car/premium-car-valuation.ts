@@ -11,7 +11,7 @@ export async function fetchValuationFromPremiumCarValuation(
 ): Promise<VehicleValuation> {
   // data will be an xml string, needs parsing to an object
   const response = await axios<string>({
-    url: premiumCarValuationUrl,
+    url: `${premiumCarValuationUrl}/valueCar`,
     method: 'GET',
     params: {
       vrm,

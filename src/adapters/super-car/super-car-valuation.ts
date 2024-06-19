@@ -9,12 +9,9 @@ export async function fetchValuationFromSuperCarValuation(
   mileage: number,
 ): Promise<VehicleValuation> {
   const response = await axios<SuperCarValuationResponse>({
-    url: superCarValuationUrl,
+    url: `${superCarValuationUrl}/valuations/${vrm}`,
     method: 'GET',
-    params: {
-      vrm,
-      mileage,
-    },
+    params: { mileage },
   });
 
   return VehicleValuation.from({

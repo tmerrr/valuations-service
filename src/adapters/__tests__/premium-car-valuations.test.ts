@@ -34,7 +34,7 @@ describe('fetchValuationFromPremiumCarValuation', () => {
       providerName: 'PremiumCarValuation',
     });
     expect(mockAxios).toHaveBeenCalledWith({
-      url: premiumCarValuationUrl,
+      url: `${premiumCarValuationUrl}/valueCar`,
       method: 'GET',
       params: {
         vrm,
