@@ -6,7 +6,7 @@ import { fetchCarValuationWithBreaker } from '@app/adapters/fetchCarValuation';
 const isValidVrm = (vrm?: string | null): vrm is string => !!vrm && vrm.length <= 7;
 
 export function valuationRoutes(fastify: FastifyInstance) {
-  const { circuitBreaker } = fastify as any;
+  const { circuitBreaker } = fastify;
   const fetchCarValuation = fetchCarValuationWithBreaker(circuitBreaker);
 
   fastify.get<{
