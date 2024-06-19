@@ -35,16 +35,16 @@ const parsePremiumCarValuationResponse = async (xmlData: string): Promise<Premiu
   return {
     registrationDate: parsedData.root.RegistrationDate[0],
     plate: {
-      month: parseInt(parsedData.root.RegistrationMonth[0]),
-      year: parseInt(parsedData.root.RegistrationYear[0]),
+      month: parseInt(parsedData.root.RegistrationMonth[0], 10),
+      year: parseInt(parsedData.root.RegistrationYear[0], 10),
     },
     privateSaleValuation: {
-      lowerValue: parseInt(parsedData.root.ValuationPrivateSaleMinimum[0]),
-      upperValue: parseInt(parsedData.root.ValuationPrivateSaleMaximum[0]),
+      lowerValue: parseInt(parsedData.root.ValuationPrivateSaleMinimum[0], 10),
+      upperValue: parseInt(parsedData.root.ValuationPrivateSaleMaximum[0], 10),
     },
     dealershipValuation: {
-      lowerValue: parseInt(parsedData.root.ValuationDealershipMinimum[0]),
-      upperValue: parseInt(parsedData.root.ValuationDealershipMaximum[0]),
+      lowerValue: parseInt(parsedData.root.ValuationDealershipMinimum[0], 10),
+      upperValue: parseInt(parsedData.root.ValuationDealershipMaximum[0], 10),
     },
   };
 };

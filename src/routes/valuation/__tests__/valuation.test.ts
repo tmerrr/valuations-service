@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { fastify, circuitBreaker } from '~root/test/fastify';
 import { SuperCarValuationResponse } from '@app/adapters/super-car/types/super-car-valuation-response';
 import { VehicleValuationDto } from '@app/models/vehicle-valuation';
@@ -10,7 +11,7 @@ const mockAxios = vi.mocked(axios);
 
 describe('ValuationController (e2e)', () => {
   beforeEach(() => {
-    (circuitBreaker as any).reset();
+    (circuitBreaker as any).reset(); // using any to access private method, to reset state of the breaker
     vi.resetAllMocks();
   });
 
